@@ -1,52 +1,47 @@
 const myScreen = document.querySelector('#screen')
 
-let mRec, lastRec, recording = false, playing = false
+let audioSrc, audioCtx = new AudioContext(), analyser = audioCtx.createAnalyser()
 
-const recBtn = document.createElement('button')
-recBtn.textContent = 'Capture Audio'
-recBtn.addEventListener('click', _ => {
-  if (!recording) {
-    navigator.mediaDevices.getUserMedia({audio: true})
-      .then(stream => {
-        ;(recording = true, recBtn.textContent = 'Stop Recording')
-   
-        const chunks = []
-        mRec = new MediaRecorder(stream)
+analyser.fftSize = 512
+const bufferLength = analyser.frequencyBinCount
+const audioDataArray = new Uint8Array(bufferLength)
+const barWidth = (myScreen || document.body)?.getClientRects()[0].width / bufferLength
 
-        mRec.addEventListener('dataavailable', ({ data }) => chunks.push(data))
-        mRec.addEventListener('stop', _ => {
-          const blob = new Blob(chunks, {type: 'audio/mp3'})
-          const url = URL.createObjectURL(blob)
-   
-          lastRec = new Audio(url)
-          lastRec.addEventListener('ended', _ => 
-            (playing = false, playBtn.textContent = 'Play Last Record')
-          )
-        })
+navigator.mediaDevices.getUserMedia({audio: true})
+  .then(stream => {
+    audioSrc = audioCtx.createMediaStreamSource(stream)
+    audioSrc.connect(analyser)
+    // analyser.connect(audioCtx.destination) // <-- plays the stream on the current audio output
+  })
 
-        mRec.start()
-      })
+const visualizer = document.createElement('div')
+visualizer.id = 'visualizer'
+visualizer.replaceChildren(...(() => {
+  let col
+  const columns = []
+  for (let i = bufferLength / 2; i > 0; i--) {
+    ;(col = document.createElement('div'), col.classList.add('column', `column-${i}`))
+    columns.push(col)
   }
-  else {
-    ;(recording = false, recBtn.textContent = 'Capture Audio')
-    mRec?.stop()
-  }
-})
+  return columns
+})())
+visualizer.drawData = function(audioDataArray) {
+  let barHeight
+  this.querySelectorAll('.column').forEach((column, index) => {
+    barHeight = audioDataArray[index]
+    column.style.height = `${(barHeight / 255) * 100}%`
+  })
+}
 
-const playBtn = document.createElement('button')
-playBtn.textContent = 'Play Last Record'
-playBtn.addEventListener('click', _ => {
-  if (!lastRec || recording) return
-
-  if (!playing) {
-    ;(playing = true, playBtn.textContent = 'Stop Playing')
-    lastRec.play()
+function animationLoop() {
+  if (audioSrc) {
+    analyser.getByteFrequencyData(audioDataArray)
+    visualizer.drawData(audioDataArray)
   }
-  else {
-    ;(playing = false, playBtn.textContent = 'Play Last Record')
-    ;(lastRec.pause(), lastRec.currentTime = 0) // lastRec.stop()
-  }
-})
 
-myScreen.appendChild(recBtn)
-myScreen.appendChild(playBtn)
+  requestAnimationFrame(animationLoop)
+}
+
+myScreen.appendChild(visualizer)
+
+animationLoop()
