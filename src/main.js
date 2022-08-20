@@ -1,6 +1,12 @@
 const myScreen = document.querySelector('#screen')
 
-let mRec, lastRec, recording = false, playing = false
+let mRec, lastRec, audioSrc, recording = false, playing = false,
+    audioCtx = new AudioContext(), analyser = audioCtx.createAnalyser()
+
+analyser.fftSize = 512
+const bufferLength = analyser.frequencyBinCount
+const audioDataArray = new Uint8Array(bufferLength)
+const barWidth = (myScreen || document.body)?.getClientRects()[0].width / bufferLength
 
 const recBtn = document.createElement('button')
 recBtn.textContent = 'Capture Audio'
@@ -22,6 +28,10 @@ recBtn.addEventListener('click', _ => {
           lastRec.addEventListener('ended', _ => 
             (playing = false, playBtn.textContent = 'Play Last Record')
           )
+
+          audioSrc = audioCtx.createMediaElementSource(lastRec)
+          audioSrc.connect(analyser)
+          analyser.connect(audioCtx.destination) // <-- plays the stream on the current audio output
         })
 
         mRec.start()
@@ -48,5 +58,42 @@ playBtn.addEventListener('click', _ => {
   }
 })
 
+const visualizer = document.createElement('div')
+visualizer.id = 'visualizer'
+visualizer.replaceChildren(...(() => {
+  let col
+  const columns = []
+  for (let i = bufferLength / 2; i > 0; i--) {
+    ;(col = document.createElement('div'), col.classList.add('column', `column-${i}`))
+    columns.push(col)
+  }
+  return columns
+})())
+visualizer.drawData = function(audioDataArray) {
+  let barHeight
+  this.querySelectorAll('.column').forEach((column, index) => {
+    barHeight = audioDataArray[index]
+    column.style.height = `${(barHeight / 255) * 100}%`
+  })
+}
+visualizer.clear = function() {
+  this.querySelectorAll('.column').forEach(column => column.style.height = '0%')
+}
+
+
+function animationLoop() {
+  if (playing) {
+    analyser.getByteFrequencyData(audioDataArray)
+    visualizer.drawData(audioDataArray)
+  }
+  else
+    visualizer.clear()
+
+  requestAnimationFrame(animationLoop)
+}
+
 myScreen.appendChild(recBtn)
 myScreen.appendChild(playBtn)
+myScreen.appendChild(visualizer)
+
+animationLoop()
