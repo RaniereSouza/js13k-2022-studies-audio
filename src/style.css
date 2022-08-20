@@ -1,0 +1,19 @@
+:root {
+  --screen-width:  100vw;
+  --screen-height: 100vh;
+}
+
+* {
+  position:   relative;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+#screen {
+  width:    var(--screen-width);
+  height:   var(--screen-height);
+  overflow: hidden;
+}
