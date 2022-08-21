@@ -19,23 +19,13 @@ body {
 }
 
 #visualizer {
-  --visualizer-cols:     128;
-  --visualizer-height:   256px;
-  display:               grid;
-  grid-template-columns: repeat(var(--visualizer-cols), 1fr);
-  grid-template-rows:    1fr;
-  position:              absolute;
-  top:                   calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
-  left:                  0;
-  width:                 var(--screen-width);
-  height:                var(--visualizer-height);
-  background-color:      #f0f8ff;
-}
-
-#visualizer .column {
-  margin-top:       auto;
-  height:           5px;
-  border-top:       5px solid lime;
-  background-color: firebrick;
-  transition:       height .0625s ease-in;
+  --visualizer-height: 256px;
+  position:            absolute;
+  top:                 calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
+  left:                0;
+  width:               var(--screen-width);
+  height:              var(--visualizer-height);
+  background-color:    #f0f8ff;
+  image-rendering:     pixelated;
+  image-rendering:     crisp-edges;
 }

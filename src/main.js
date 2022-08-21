@@ -14,28 +14,26 @@ navigator.mediaDevices.getUserMedia({audio: true})
     // analyser.connect(audioCtx.destination) // <-- plays the stream on the current audio output
   })
 
-const visualizer = document.createElement('div')
+const visualizer = document.createElement('canvas')
 visualizer.id = 'visualizer'
-visualizer.replaceChildren(...(() => {
-  let col
-  const columns = []
-  for (let i = bufferLength / 2; i > 0; i--) {
-    ;(col = document.createElement('div'), col.classList.add('column', `column-${i}`))
-    columns.push(col)
-  }
-  return columns
-})())
 visualizer.drawData = function(audioDataArray) {
-  let barHeight
-  this.querySelectorAll('.column').forEach((column, index) => {
-    barHeight = audioDataArray[index]
-    column.style.height = `${(barHeight / 255) * 100}%`
-  })
+  if (!this.context) {
+    this.context = this.getContext('2d')
+    this.context.fillStyle = 'firebrick'
+  }
+  if (!this.rects) this.rects = this.getClientRects()[0]
+
+  this.context?.clearRect(0, 0, this.rects?.width, this.rects?.height)
+  audioDataArray.forEach(
+    (item, index) => this.context?.fillRect(
+      index * barWidth, item - 50, barWidth, 2,
+    )
+  )
 }
 
 function animationLoop() {
   if (audioSrc) {
-    analyser.getByteFrequencyData(audioDataArray)
+    analyser.getByteTimeDomainData(audioDataArray)
     visualizer.drawData(audioDataArray)
   }
 
