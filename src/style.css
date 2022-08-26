@@ -1,11 +1,16 @@
 :root {
-  --screen-width:  100vw;
-  --screen-height: 100vh;
+  --screen-width:      100vw;
+  --screen-height:     100vh;
+  --visualizer-height: 256px;
 }
 
 * {
   position:   relative;
   box-sizing: border-box;
+}
+
+html {
+  font-family: 'Helvetica', sans-serif;
 }
 
 body {
@@ -19,13 +24,135 @@ body {
 }
 
 #visualizer {
-  --visualizer-height: 256px;
-  position:            absolute;
-  top:                 calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
-  left:                0;
-  width:               var(--screen-width);
-  height:              var(--visualizer-height);
-  background-color:    #f0f8ff;
-  image-rendering:     pixelated;
-  image-rendering:     crisp-edges;
+  position:         absolute;
+  top:              calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
+  left:             0;
+  width:            var(--screen-width);
+  height:           var(--visualizer-height);
+  background-color: #f0f8ff;
+  image-rendering:  pixelated;
+  image-rendering:  crisp-edges;
+}
+
+#note-info {
+  --note-info-size: calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
+  display:          flex;
+  flex-direction:   column;
+  align-items:      center;
+  justify-content:  center;
+  position:         absolute;
+  top:              0;
+  left:             0;
+  width:            var(--note-info-size);
+  height:           var(--note-info-size);
+  background-color: #fff8f0;
+}
+
+#note-info .octave {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  position:         absolute;
+  top:              0;
+  right:            0;
+  width:            36px;
+  height:           36px;
+  background-color: #f0f8ff;
+  font-size:        24px;
+}
+
+#note-info .note {
+  font-size: 48px;
+}
+
+#note-info.playing .note {
+  color:       blue;
+  text-shadow: 0 0 8px cornflowerblue;
+}
+
+#note-info .frequency {
+  font-size: 18px;
+}
+
+#oscillators-list {
+  --oscilators-list-height: calc((var(--screen-height) / 2) - (var(--visualizer-height) / 2));
+  position:                 absolute;
+  top:                      0;
+  right:                    0;
+  margin:                   0;
+  width:                    calc(var(--screen-width) - var(--oscilators-list-height));
+  height:                   var(--oscilators-list-height);
+  padding:                  36px 8px 0 36px;
+  background-color:         #fff0f8;
+  list-style:               none;
+  overflow-y:               scroll;
+}
+
+#oscillators-list .add {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  position:        absolute;
+  top:             6px;
+  left:            6px;
+  width:           24px;
+  height:          24px;
+  padding:         0;
+}
+
+#oscillators-list .label {
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  position:         absolute;
+  top:              0;
+  right:            0;
+  height:           36px;
+  padding:          0 8px;
+  background-color: #f0f8ff;
+  font-size:        18px;
+}
+
+#oscillators-list .oscillator {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+}
+
+#oscillators-list .oscillator + .oscillator {
+  margin-top: 8px;
+}
+
+#oscillators-list .oscillator .title {
+  display:       block;
+  margin-bottom: 8px;
+}
+
+#oscillators-list .oscillator .control + .control {
+  margin-top: 8px;
+}
+
+#oscillators-list .oscillator .master-volume-control input,
+#oscillators-list .oscillator .tone-control input {
+  width: 100%;
+}
+
+#oscillators-list .oscillator .adsr-control label,
+#oscillators-list .oscillator .eq-control label {
+  display:     flex;
+  align-items: center;
+}
+
+#oscillators-list .oscillator .adsr-control label > span,
+#oscillators-list .oscillator .eq-control label > span {
+  width: 12.5%;
+}
+
+#oscillators-list .oscillator .adsr-control input,
+#oscillators-list .oscillator .eq-control input {
+  width: 100%;
+}
+
+#oscillators-list .oscillator .adsr-control,
+#oscillators-list .oscillator .eq-control {
+  opacity: 0.25;
 }
